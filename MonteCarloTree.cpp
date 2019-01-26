@@ -1,3 +1,4 @@
+
 #include<iostream>
 #include<cstdlib>
 #include<ctime>
@@ -6,8 +7,8 @@
 #define LEN 10
 
 #define INIT_VAL 1
-#define STRIKE 100
-#define BALL 10
+#define STRIKE 10
+#define BALL 1
 
 using namespace std;
 
@@ -149,7 +150,7 @@ public :
 	}
 	
 	// remove success value using traverse return value in MonteCarloTree
-	void removeNumber(int number[CNT]){
+	void removeNumber(int number){
 		int i, j, k;
 		MonteCarloTreeNode* main_node = this;
 		MonteCarloTreeNode* current_node;
@@ -158,37 +159,12 @@ public :
 			current_node = main_node->child[i];
 			
 			// clear number becuase that number is not anwser.
-			for(j=0; j<CNT; j++){
-				if( i==number[j] ){
-					current_node->success = 0;
-				}
+			if( i==number ){
+				current_node->success = 0;
 			}
 			
 			if( current_node->deep <= CNT ){
 				current_node->removeNumber(number);
-			}
-		}
-	 
-	}
-	
-	// remove success value using traverse return value in MonteCarloTree
-	void updateExistNumber(int number[CNT]){
-		int i, j, k;
-		MonteCarloTreeNode* main_node = this;
-		MonteCarloTreeNode* current_node;
-		
-		for(i=0; i<LEN; i++){
-			current_node = main_node->child[i];
-			
-			// clear number becuase that number is not anwser.
-			for(j=0; j<CNT; j++){
-				if( i==number[j] ){
-					current_node->success += BALL;
-				}
-			}
-			
-			if( current_node->deep <= CNT ){
-				current_node->updateExistNumber(number);
 			}
 		}
 	 
@@ -202,21 +178,29 @@ class MonteCarloTree{
 private :
 	MonteCarloTreeNode* root;
 	BaseballGame game;
-	
+	bool clear_number[LEN];
 public :
 	MonteCarloTree(){
+		int i;
+		
 		// create root node ( deep is 1)
 		root = new MonteCarloTreeNode(1);
 		
 		// show answer
 		game.printAnswer();
+		
+		// set clear number
+		for(i=0; i<LEN; i++){
+			clear_number[i] = false;
+		}
 	}
 	
 	// traverse random number
 	void traverse(){
-		int i;
+		int i, j;
 		int idx;
 		int score;
+		bool is_exist;
 		int number[CNT];
 		MonteCarloTreeNode* current_node = root;
 		
@@ -234,14 +218,36 @@ public :
 		if( score > 0 ){
 			root->updateNumber(number, score);
 			
-			// if all number is correct then update all exist number.
+			// if all number is correct then clear other numbers.
 			if( score/STRIKE + (score/BALL) % BALL == CNT ){
-				root->updateExistNumber(number);
+				for(i=0; i<LEN; i++){
+					if( clear_number[i] == true ){
+						continue;
+					}
+					
+					is_exist = false;
+					for(j=0; j<CNT; j++){
+						if( i == number[j] ){
+							is_exist = true;
+						}
+					}
+					
+					if( is_exist == false){
+						root->removeNumber(i);
+						clear_number[i]=true;
+					}
+				}
 			}
 		}
 		// if score value is 0 then remove number because that number is not answer
 		else{
-			root->removeNumber(number);
+			for(i=0; i<CNT; i++){
+				idx = number[i];
+				if(clear_number[idx] == false){
+					root->removeNumber(idx);
+					clear_number[idx]=true;
+				}
+			}
 		}
 		
 	}
@@ -269,7 +275,13 @@ public :
 				}
 			}
 			
-			main_node = main_node->child[idx];
+			// if init value then
+			if( max_value == INIT_VAL ){
+				main_node = main_node->child[idx];
+			}
+			else{
+				main_node = main_node->child[main_node->selectChild()];
+			}
 			number[i] = idx;
 		}
 		
