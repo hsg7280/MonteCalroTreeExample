@@ -18,10 +18,11 @@ private :
 public :
 	// constructor and generate answer
 	BaseballGame(){
+		int i;
 		srand(time(NULL));
-		answer[0] = rand()%10;
-		answer[1] = rand()%10;
-		answer[2] = rand()%10;
+		for(i=0; i<CNT; i++){
+			answer[i] = rand()%10;
+		}
 	}
 	
 	// calculate score
@@ -149,7 +150,7 @@ public :
 	
 	// remove success value using traverse return value in MonteCarloTree
 	void removeNumber(int number[CNT]){
-		int i, j;
+		int i, j, k;
 		MonteCarloTreeNode* main_node = this;
 		MonteCarloTreeNode* current_node;
 		
@@ -167,7 +168,30 @@ public :
 				current_node->removeNumber(number);
 			}
 		}
+	 
+	}
+	
+	// remove success value using traverse return value in MonteCarloTree
+	void updateExistNumber(int number[CNT]){
+		int i, j, k;
+		MonteCarloTreeNode* main_node = this;
+		MonteCarloTreeNode* current_node;
 		
+		for(i=0; i<LEN; i++){
+			current_node = main_node->child[i];
+			
+			// clear number becuase that number is not anwser.
+			for(j=0; j<CNT; j++){
+				if( i==number[j] ){
+					current_node->success += BALL;
+				}
+			}
+			
+			if( current_node->deep <= CNT ){
+				current_node->updateExistNumber(number);
+			}
+		}
+	 
 	}
 	
 	friend class MonteCarloTree;
@@ -178,6 +202,7 @@ class MonteCarloTree{
 private :
 	MonteCarloTreeNode* root;
 	BaseballGame game;
+	
 public :
 	MonteCarloTree(){
 		// create root node ( deep is 1)
@@ -208,6 +233,11 @@ public :
 		// if score value is bigger than 0 then update success and challenge value
 		if( score > 0 ){
 			root->updateNumber(number, score);
+			
+			// if all number is correct then update all exist number.
+			if( score/STRIKE + (score/BALL) % BALL == CNT ){
+				root->updateExistNumber(number);
+			}
 		}
 		// if score value is 0 then remove number because that number is not answer
 		else{
