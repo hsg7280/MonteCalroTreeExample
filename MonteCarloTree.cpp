@@ -5,6 +5,10 @@
 #define CNT 3
 #define LEN 10
 
+#define INIT_VAL 1
+#define STRIKE 100
+#define BALL 10
+
 using namespace std;
 
 //this is the game class for generating numbera and calculating score
@@ -34,7 +38,7 @@ public :
 		// correct number and position then add 10 point and remove number
 		for( i=0; i<CNT; i++ ){
 			if( number[i] == tmp_answer[i] ){
-				score+=10;
+				score+=STRIKE;
 				tmp_answer[i]=-1;
 			}
 		}
@@ -43,7 +47,7 @@ public :
 		for( i=0; i<CNT; i++ ){
 			for( j=0; j<CNT; j++ ){
 				if( number[j] == tmp_answer[i] ){
-					score+=1;
+					score+=BALL;
 					tmp_answer[i]=-1;
 					break;
 				}
@@ -78,10 +82,9 @@ public :
 	MonteCarloTreeNode(int _deep){
 		int i;
 		
-		// init challenge is 1. you can fix it.
-		challenge=1;
-		// init success is 1. you can modify it.
-		success=1;
+		// set initial value
+		challenge=INIT_VAL;
+		success=INIT_VAL;
 		deep = _deep;
 		
 		// if this node is not leaf node then create child node.
@@ -121,7 +124,7 @@ public :
 		for(i=0; i<LEN && success_sum_tmp < selected_value; i++){
 			if( child[i]->success != 0 ){
 				success_sum_tmp += child[i]->success / child[i]->challenge;
-				child_idx++;
+				child_idx = i;
 			}
 		}
 		
@@ -263,4 +266,3 @@ int main(){
 	
 	return 0;
 }
-
