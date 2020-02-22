@@ -277,6 +277,10 @@ public :
 		if( score == 0 ){
 			root->removeNumber(number, len);
 		}
+		else if( score == len * 10 ){
+			// save score
+			root->setNumber(number, len);
+		}
 		else if( (score/10) + (score%10) == len ){
 			// remove non-target number
 			for( i=0; i<LEN; i++){
@@ -293,10 +297,6 @@ public :
 					root->removeOneNumber(i, len);
 				}
 			}
-		}
-		else if( score == len * 10 ){
-			// save score
-			root->setNumber(number, len);
 		}
 		
 		free(number);
@@ -332,7 +332,7 @@ int main(){
 	MonteCarloTree tree(game, CNT);
 	
 	// traverse using random value
-	for(i=0; i<100; i++){
+	for(i=0; i<1000; i++){
 		tree.traverse();
 	}
 	
